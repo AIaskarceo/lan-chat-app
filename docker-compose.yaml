@@ -1,0 +1,62 @@
+
+services:
+  mysql:
+    image: mysql:8.0.44
+    container_name: chat_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword123
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    ports:
+      - "3307:3306"
+    networks:
+      - mysql-connect
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./server
+    container_name: chat_server
+    ports:
+      - "8000:8000"
+    networks:
+      - mysql-connect
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      MYSQL_HOST: ${MYSQL_HOST}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      SERVER_PORT: ${SERVER_PORT}
+    env_file:
+      - .env
+    stdin_open: true
+    tty: true
+
+  frontend:
+    build: ./lan_chat_react
+    container_name: chat_react
+    ports:
+      - "5173:5173"
+    networks:
+      - mysql-connect
+    depends_on:
+      - backend
+    environment:
+      VITE_API_URL: http://localhost:8000
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  mysql-connect:
+    driver: bridge
