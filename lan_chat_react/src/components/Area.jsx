@@ -1,11 +1,11 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { useState } from "react";
 import './Area.css'
 
 const Area = ()=>{
-    const [socket,setSocket] = useState(null)
     const [messages,setMessages] = useState([])
     const [inputValue,setInputValue] = useState('')
+    const socketRef = useRef(null)
     
     useEffect(() =>{
         const ws = new WebSocket('ws://localhost:8000')
@@ -32,7 +32,7 @@ const Area = ()=>{
             }
         }
         
-        setSocket(ws)
+        socketRef.current = ws
         
         return () => {
             ws.close()
@@ -40,8 +40,8 @@ const Area = ()=>{
     },[])
 
     const handleSend = ()=>{
-        if(inputValue.trim() !== '' && socket && socket.readyState === WebSocket.OPEN){
-            socket.send(JSON.stringify({ message: inputValue }))
+        if(inputValue.trim() !== '' && socketRef.current && socketRef.current.readyState === WebSocket.OPEN){
+            socketRef.current.send(JSON.stringify({ message: inputValue }))
             setMessages([...messages, { text: inputValue, type: 'client' }])
             setInputValue('')
         }
