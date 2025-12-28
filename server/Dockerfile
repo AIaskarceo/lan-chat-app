@@ -7,7 +7,6 @@ COPY package*.json ./
 RUN npm install
 
 COPY server.js .
-COPY .env .
 
 EXPOSE 8000
 
