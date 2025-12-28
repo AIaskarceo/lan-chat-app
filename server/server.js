@@ -143,7 +143,7 @@ rl.on('line', async (input) => {
     }
 })
 
-// Initialize database and start server
+// Initialize database and start server testing again
 async function startServer() {
     await initializeDatabase()
     console.log(`WebSocket server running on port ${process.env.SERVER_PORT || 8000}`)
